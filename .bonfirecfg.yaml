@@ -1,0 +1,8 @@
+# Bonfire deployment configuration
+apps:
+- name: distributors-backend
+  components:
+    - name: service
+      host: local
+      repo: ./
+      path: /clowdapp.yaml
