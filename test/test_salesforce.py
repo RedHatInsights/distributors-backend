@@ -64,23 +64,14 @@ class TestSalesforceService:
             execute_apex("test/endpoint", "GET", {})
 
     @patch("src.services.salesforce._get_private_key")
-    @patch("src.services.salesforce.constants")
     @patch("src.services.salesforce.Salesforce")
-    def test_get_salesforce_success(
-        self, mock_salesforce_class, mock_constants, mock_get_private_key
-    ):
+    def test_get_salesforce_success(self, mock_salesforce_class, mock_get_private_key):
         """Test successful Salesforce connection creation."""
         # Arrange
         mock_private_key = (
             "-----BEGIN PRIVATE KEY-----\ntest_key\n-----END PRIVATE KEY-----"
         )
         mock_get_private_key.return_value = mock_private_key
-
-        mock_constants.SALESFORCE_DOMAIN = "test-domain"
-        mock_constants.SALESFORCE_USERNAME = "test@example.com"
-        mock_constants.SALESFORCE_CONSUMER_KEY.get_secret_value.return_value = (
-            "consumer_key_123"
-        )
 
         mock_sf_instance = Mock(spec=Salesforce)
         mock_salesforce_class.return_value = mock_sf_instance
@@ -94,7 +85,7 @@ class TestSalesforceService:
         mock_salesforce_class.assert_called_once_with(
             domain="test-domain",
             username="test@example.com",
-            consumer_key="consumer_key_123",
+            consumer_key="test-consumer-key",
             privatekey=mock_private_key,
         )
 
