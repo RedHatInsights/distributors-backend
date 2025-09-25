@@ -10,8 +10,6 @@ objects:
     name: "${APP_NAME}"
   spec:
     envName: ${ENV_NAME}
-    database:
-      name: "${APP_NAME}"
     deployments:
     - name: service
       minReplicas: ${{REPLICAS_SERVICE}}
@@ -21,26 +19,57 @@ objects:
         public:
           enabled: true
           apiPath: "${APP_NAME}"
+          whitelistPaths:
+            - "/api/${APP_NAME}/docs"
+            - "/api/${APP_NAME}/openapi.json"
       podSpec:
-        initContainers:
-          - args:
-            - "migrate"
-            inheritEnv: true
-            volumeMounts:
-              - name: data
-                mountPath: "${DATA_DIR}"
         image: ${IMAGE}:${IMAGE_TAG}
         env:
           - name: APP_NAME
             value: "${APP_NAME}"
-          - name: DATA_DIR
-            value: "${DATA_DIR}"
+          - name: SALESFORCE_KEYSTORE_PATH
+            value: "${SALESFORCE_KEYSTORE_DIR}/${SALESFORCE_KEYSTORE_FILE}"
+          - name: SALESFORCE_DOMAIN
+            valueFrom:
+              secretKeyRef:
+                name: "${APP_NAME}-salesforce-config"
+                key: SALESFORCE_DOMAIN
+          - name: SALESFORCE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: "${APP_NAME}-salesforce-config"
+                key: SALESFORCE_USERNAME
+          - name: SALESFORCE_CONSUMER_KEY
+            valueFrom:
+              secretKeyRef:
+                name: "${APP_NAME}-salesforce-config"
+                key: SALESFORCE_CONSUMER_KEY
+          - name: SALESFORCE_KEYSTORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "${APP_NAME}-salesforce-config"
+                key: SALESFORCE_KEYSTORE_PASSWORD
+          - name: SALESFORCE_CERT_ALIAS
+            valueFrom:
+              secretKeyRef:
+                name: "${APP_NAME}-salesforce-config"
+                key: SALESFORCE_CERT_ALIAS
+          - name: SALESFORCE_CERT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "${APP_NAME}-salesforce-config"
+                key: SALESFORCE_CERT_PASSWORD
         volumeMounts:
-          - name: data
-            mountPath: "${DATA_DIR}"
+          - name: salesforce-secrets
+            mountPath: "${SALESFORCE_KEYSTORE_DIR}"
+            readOnly: true
         volumes:
-          - name: data
-            emptyDir : {}
+          - name: salesforce-secrets
+            secret:
+              secretName: "${APP_NAME}-salesforce-config"
+              items:
+                - key: salesforce_keystore.jks
+                  path: "${SALESFORCE_KEYSTORE_FILE}"
         resources:
           limits:
             cpu: ${CPU_LIMIT_SERVICE}
@@ -59,7 +88,26 @@ objects:
             path: /readyz
             port: ${{WEB_PORT}}
 
+# secret configuration for running in ephemeral environment ONLY
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: "${APP_NAME}-salesforce-config"
+  type: Opaque
+  stringData:
+    SALESFORCE_DOMAIN: "${SALESFORCE_DOMAIN}"
+    SALESFORCE_USERNAME: "${SALESFORCE_USERNAME}"
+    SALESFORCE_CONSUMER_KEY: "${SALESFORCE_CONSUMER_KEY}"
+    SALESFORCE_KEYSTORE_PASSWORD: "${SALESFORCE_KEYSTORE_PASSWORD}"
+    SALESFORCE_CERT_ALIAS: "${SALESFORCE_CERT_ALIAS}"
+    SALESFORCE_CERT_PASSWORD: "${SALESFORCE_CERT_PASSWORD}"
+  data:
+    salesforce_keystore.jks: "${SALESFORCE_KEYSTORE_DATA}"
+
 parameters:
+- name: APP_NAME
+  required: true
+  value: distributors
 - name: IMAGE_TAG
   description: Image tag
   required: true
@@ -69,16 +117,9 @@ parameters:
   value: quay.io/cloudservices/distributors-backend
 - name: ENV_NAME
   description: ClowdEnv Name
-- name: DATA_DIR
-  description: Data directory path
-  required: true
-  value: '/data'
 - name: REPLICAS_SERVICE
   description: Replica count for backend service
   value: "1"
-- name: APP_NAME
-  required: true
-  value: distributors-backend
 - name: WEB_PORT
   description: Port this is running on
   value: "8000"
@@ -90,3 +131,32 @@ parameters:
   value: 500m
 - name: CPU_REQUEST_SERVICE
   value: 200m
+- name: SALESFORCE_KEYSTORE_DIR
+  description: Salesforce keystore file directory
+  value: "/app-secrets"
+- name: SALESFORCE_KEYSTORE_FILE
+  description: Salesforce keystore file name
+  value: "salesforce_keystore.jks"
+
+# parameters for ephemeral environment ONLY
+- name: SALESFORCE_DOMAIN
+  description: Salesforce domain for API connections
+  required: false
+- name: SALESFORCE_USERNAME
+  description: Salesforce username for API authentication
+  required: false
+- name: SALESFORCE_CONSUMER_KEY
+  description: Salesforce consumer key for OAuth
+  required: false
+- name: SALESFORCE_KEYSTORE_DATA
+  description: Base64 encoded keystore file contents
+  required: false
+- name: SALESFORCE_KEYSTORE_PASSWORD
+  description: Password for Salesforce keystore
+  required: false
+- name: SALESFORCE_CERT_ALIAS
+  description: Certificate alias in Salesforce keystore
+  required: false
+- name: SALESFORCE_CERT_PASSWORD
+  description: Password for Salesforce certificate
+  required: false

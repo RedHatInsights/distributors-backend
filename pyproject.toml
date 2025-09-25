@@ -3,17 +3,22 @@ name = "distributors-backend"
 description = "A barebones python app"
 version = "0.0.1"
 dependencies = [
-    "djangorestframework",
-    "markdown",
-    "django-filter",
-    "app-common-python>=0.2.6",
-    "django-prometheus",
-    "python-json-logger",
-    "psycopg",
+    "dotenv==0.9.*",
+    "fastapi[standard]==0.116.*",
+    "pydantic-settings==2.10.*",
+    "pyjks==20.0.*",
+    "requests==2.32.*",
+    "simple-salesforce==1.12.*",
 ]
 
-[project.optional-dependencies]
-dev = ["pre-commit", "coverage", "crc-bonfire<5"]
+[dependency-groups]
+dev = [
+    "crc-bonfire<8",
+    "mypy==1.17.*",
+    "pre-commit==4.3.*",
+    "pydocstyle==6.3.*",
+    "ruff==0.12.*",
+]
 
 [build-system]
 requires = ["setuptools>=40.8.0"]

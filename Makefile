@@ -7,10 +7,9 @@ HOST_WEBPORT=$(CONTAINER_WEBPORT)
 CONTEXT = .
 CONTAINER_ENGINE = podman
 BONFIRE_CONFIG = .bonfirecfg.yaml
-POSTGRESQL_IMAGE=quay.io/cloudservices/postgresql-rds:15
 CLOWDAPP_TEMPLATE ?= clowdapp.yaml
 APP_NAME ?= distributors-backend
-PYTHON_CMD = python3.11
+PYTHON_CMD = uv run
 QUAY_ORG ?= cloudservices
 QUAY_REPOSITORY ?= $(APP_NAME)
 IMAGE = quay.io/$(QUAY_ORG)/$(QUAY_REPOSITORY)
@@ -37,7 +36,7 @@ else
 	IMAGE_TAG=$(BASE_IMAGE_TAG)
 endif
 
-run: venv_check stop-db install start-db migrate
+run: venv_check install
 	${PYTHON_CMD} manage.py runserver
 
 migrate: venv_check
@@ -47,65 +46,57 @@ install_pre_commit: venv_check
 	# Remove any outdated tools
 	rm -rf $(TEMPDIR_INFOSECTOOLS)
 	# Clone up-to-date tools
-	git clone https://gitlab.corp.redhat.com/infosec-public/developer-workbench/tools.git /tmp/infosec-dev-tools
+	git clone https://gitlab.corp.redhat.com/infosec-public/developer-workbench/tools.git $(TEMPDIR_INFOSECTOOLS)
 
 	# Cleanup installed old tools
 	$(TEMPDIR_INFOSECTOOLS)/scripts/uninstall-legacy-tools
 
 	# install pre-commit and configure it on our repo
-	make -C $(TEMPDIR_INFOSECTOOLS)/rh-pre-commit install
-	python -m rh_pre_commit.multi configure --configure-git-template --force
-	python -m rh_pre_commit.multi install --force --path ./
+	$(TEMPDIR_INFOSECTOOLS)/rh-pre-commit/quickstart.sh -r .
 
 	rm -rf $(TEMPDIR_INFOSECTOOLS)
 
 venv_check:
-ifndef VIRTUAL_ENV
-	$(error Not in a virtual environment)
-endif
+	@uv venv --help > /dev/null 2>&1 || (echo "uv not installed" && exit 1)
+	@test -d .venv || (echo "No uv virtual environment found. Run 'uv venv' to create one." && exit 1)
 
 venv_create:
-ifndef VIRTUAL_ENV
-	$(PYTHON_CMD) -m venv $(VENV)
-	@echo "Virtual environment $(VENV) created, activate running: source $(VENV)/bin/activate"
-else
-	$(warning VIRTUAL_ENV variable present, already within a virtual environment?)
-endif
+	@test -d .venv && echo "Virtual environment already exists" || uv venv $(VENV)
 
 quay_login:
 	echo -n "$(QUAY_TOKEN)" | $(CONTAINER_ENGINE) login quay.io --username $(QUAY_USER) --password-stdin
 
 lint: install_dev
-	pre-commit run --all
+	uv run pre-commit run --all
 
 install: venv_check
-	python -m pip install -e .
+	uv sync
 
 install_dev: venv_check
-	python -m pip install -e .[dev]
+	uv sync --dev
+
+run_dev: venv_check
+	uv run fastapi dev src/main.py
 
 clean:
 	rm -rf __pycache__
 	find . -name "*.pyc" -exec rm -f {} \;
 
-test: venv_check install_dev start-db
+test: venv_check install_dev
 	${PYTHON_CMD} manage.py test
-	make stop-db
 
-smoke-test: venv_check install_dev start-db
+smoke-test: venv_check install_dev
 	@echo "Running smoke tests"
-	make stop-db
 
-coverage: venv_check install_dev start-db
+coverage: venv_check install_dev
 	coverage run --source="." manage.py test
 	coverage $(COVERAGE_REPORT_FORMAT)
-	make stop-db
 
 coverage-ci: COVERAGE_REPORT_FORMAT=xml
 coverage-ci: coverage
 
 build-image:
-	$(CONTAINER_ENGINE) build -t $(IMAGE):$(IMAGE_TAG) -f $(DOCKERFILE) $(LABEL) $(CONTEXT)
+	$(CONTAINER_ENGINE) buildx build --platform linux/amd64 -t $(IMAGE):$(IMAGE_TAG) -f $(DOCKERFILE) $(LABEL) $(CONTEXT)
 
 run-container:
 	$(CONTAINER_ENGINE) run -it --rm -p $(HOST_WEBPORT):$(CONTAINER_WEBPORT) $(IMAGE):$(IMAGE_TAG) runserver 0.0.0.0:8000
@@ -119,11 +110,19 @@ ifndef NAMESPACE
 endif
 
 bonfire_process:
-	bonfire process -c $(BONFIRE_CONFIG) $(APP_NAME) -s local \
-		-p service/IMAGE=$(IMAGE) -p service/IMAGE_TAG=$(IMAGE_TAG) -n default
+	bonfire process -c $(BONFIRE_CONFIG) $(APP_NAME) \
+		-p service/IMAGE=$(IMAGE) -p service/IMAGE_TAG=$(IMAGE_TAG) \
+		-p service/SALESFORCE_DOMAIN="$(SALESFORCE_DOMAIN)" \
+		-p service/SALESFORCE_USERNAME="$(SALESFORCE_USERNAME)" \
+		-p service/SALESFORCE_CONSUMER_KEY="$(SALESFORCE_CONSUMER_KEY)" \
+		-p service/SALESFORCE_KEYSTORE_DATA="$(SALESFORCE_KEYSTORE_DATA)" \
+		-p service/SALESFORCE_KEYSTORE_PASSWORD="$(SALESFORCE_KEYSTORE_PASSWORD)" \
+		-p service/SALESFORCE_CERT_ALIAS="$(SALESFORCE_CERT_ALIAS)" \
+		-p service/SALESFORCE_CERT_PASSWORD="$(SALESFORCE_CERT_PASSWORD)" \
+		-n default
 
 bonfire_reserve_namespace:
-	@bonfire namespace reserve -f
+	@bonfire namespace reserve -f --duration 24h
 
 bonfire_release_namespace: namespace_check
 	bonfire namespace release $(NAMESPACE) -f
@@ -132,16 +131,16 @@ bonfire_user_namespaces:
 	bonfire namespace list --mine
 
 bonfire_deploy: namespace_check
-	bonfire deploy -c $(BONFIRE_CONFIG) $(APP_NAME) -s local \
-		-p service/IMAGE=$(IMAGE) -p service/IMAGE_TAG=$(IMAGE_TAG) -n $(NAMESPACE)
+	bonfire deploy -c $(BONFIRE_CONFIG) $(APP_NAME) \
+		-p service/IMAGE=$(IMAGE) -p service/IMAGE_TAG=$(IMAGE_TAG) \
+		-p service/SALESFORCE_DOMAIN="$(SALESFORCE_DOMAIN)" \
+		-p service/SALESFORCE_USERNAME="$(SALESFORCE_USERNAME)" \
+		-p service/SALESFORCE_CONSUMER_KEY="$(SALESFORCE_CONSUMER_KEY)" \
+		-p service/SALESFORCE_KEYSTORE_DATA="$(SALESFORCE_KEYSTORE_DATA)" \
+		-p service/SALESFORCE_KEYSTORE_PASSWORD="$(SALESFORCE_KEYSTORE_PASSWORD)" \
+		-p service/SALESFORCE_CERT_ALIAS="$(SALESFORCE_CERT_ALIAS)" \
+		-p service/SALESFORCE_CERT_PASSWORD="$(SALESFORCE_CERT_PASSWORD)" \
+		-n $(NAMESPACE)
 
-start-db:
-	$(CONTAINER_ENGINE) run -e POSTGRESQL_PASSWORD=$(APP_NAME) -e POSTGRESQL_USER=$(APP_NAME)  -e POSTGRESQL_DATABASE=$(APP_NAME)  -p 5432:5432 --name $(APP_NAME)-db $(POSTGRESQL_IMAGE) &
-	sleep 20
-	make migrate
-
-stop-db:
-	$(CONTAINER_ENGINE) stop $(APP_NAME)-db
-	$(CONTAINER_ENGINE) rm $(APP_NAME)-db
 oc_login:
 	@oc login --token=${OC_LOGIN_TOKEN} --server=${OC_LOGIN_SERVER}

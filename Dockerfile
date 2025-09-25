@@ -1,14 +1,14 @@
-FROM registry.access.redhat.com/ubi8/python-311:1-8.1687187517 AS builder
+FROM registry.access.redhat.com/ubi9/python-312:9.6 AS builder
 
 COPY --chown=1001:0 . /app-src
 RUN pip install --no-cache-dir /app-src
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.8-860
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6
 
 ENV VIRTUAL_ENV='/opt/app-root'
 ENV APP_SRC='/app-src'
 
-RUN microdnf install -y python3.11-3.11.2-2.el8_8.2.x86_64 libpq-devel \
+RUN microdnf install -y python3.12 \
     && microdnf clean all
 
 RUN mkdir $APP_SRC && chown 1001:0 $APP_SRC
@@ -22,5 +22,4 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 WORKDIR /app-src
 
-ENTRYPOINT ["python", "manage.py"]
-CMD ["runserver", "0.0.0.0:8000"]
+ENTRYPOINT ["fastapi", "run", "/app-src/src/main.py"]

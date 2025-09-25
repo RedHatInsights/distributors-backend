@@ -122,14 +122,10 @@ To run this project on a container using your local container engine of choice w
 
 #### Build the container image
 
-To build the contaienr image, simply one of these commands, depending if you're using podman or docker:
+To build the container image, simply one of these commands, depending if you're using podman or docker:
 
 ```shell
-# build with podman
 make build-image
-
-# build with docker
-make build-image-docker
 ```
 
 #### Run the container image
@@ -137,11 +133,7 @@ make build-image-docker
 To run the recently built image, similarly to how you built the image in the previous section, use one of these commands
 
 ```shell
-# run with podman
 make run-container
-
-# run with docker
-make run-container-docker
 ```
 
 ## Deploying to an Ephemeral namespace
@@ -200,11 +192,7 @@ the user's personal organization in Quay.io
 To build and push the application's image simply run:
 
 ```shell
-# with podman
 make build-image push-image
-
-# with docker
-make build-image-docker push-image-docker
 ```
 
 Once pushed, the image needs to be pulled by the Clowder operator. If the repository is `public` there should be no
@@ -317,17 +305,8 @@ git commit
 
 We are using the python package [pre-commit](https://pre-commit.com/) to handle the setup and maintenance pre-commit hooks. We
 have pre-configured a few commit hooks but we encourage modifying the `.pre-commit-config.yaml` to fit your project as needed.
-If you don't already have a virtual environment setup, you can use the following commands to do that.
 
-```bash
-# Create the virtual environment
-$ make venv_create
-# Activate the virtual environment
-$ source .venv/bin/activate
-```
-
-Once you have sourced your virtual environment you can install the pre-commit package and the hooks themselves with the following
-commands:
+You can install the pre-commit package and the hooks themselves with the following command:
 
 ```bash
 # Install pre-commit hooks by installing the project's dependencies and development dependencies
