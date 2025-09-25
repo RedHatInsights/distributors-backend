@@ -37,10 +37,7 @@ else
 endif
 
 run: venv_check install
-	${PYTHON_CMD} manage.py runserver
-
-migrate: venv_check
-	${PYTHON_CMD} manage.py migrate
+	uv run fastapi dev src/main.py
 
 install_pre_commit: venv_check
 	# Remove any outdated tools
@@ -75,25 +72,18 @@ install: venv_check
 install_dev: venv_check
 	uv sync --dev
 
-run_dev: venv_check
-	uv run fastapi dev src/main.py
-
 clean:
 	rm -rf __pycache__
 	find . -name "*.pyc" -exec rm -f {} \;
 
 test: venv_check install_dev
-	${PYTHON_CMD} manage.py test
-
-smoke-test: venv_check install_dev
-	@echo "Running smoke tests"
+	${PYTHON_CMD} pytest test/
 
 coverage: venv_check install_dev
-	coverage run --source="." manage.py test
-	coverage $(COVERAGE_REPORT_FORMAT)
+	${PYTHON_CMD} pytest test/ --cov=src --cov-report=term --cov-report=html
 
-coverage-ci: COVERAGE_REPORT_FORMAT=xml
-coverage-ci: coverage
+coverage-ci: venv_check install_dev
+	${PYTHON_CMD} pytest test/ --cov=src --cov-report=term --cov-report=xml
 
 build-image:
 	$(CONTAINER_ENGINE) buildx build --platform linux/amd64 -t $(IMAGE):$(IMAGE_TAG) -f $(DOCKERFILE) $(LABEL) $(CONTEXT)
