@@ -66,6 +66,7 @@ parameters:
   value: latest
 - name: IMAGE
   description: Image name
+  value: quay.io/cloudservices/distributors-backend
 - name: ENV_NAME
   description: ClowdEnv Name
 - name: DATA_DIR
