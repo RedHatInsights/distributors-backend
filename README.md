@@ -6,16 +6,14 @@ to create their own applications.
 
 ## Prerequisites
 
-- This project requires Python 3 and Django REST Framework to run. We recommend to use at least Python 3.10, but any
-version 3.6+ will work too. Once you have those all you will want to create and activate a virtual environment for
-the app and install Django. The project uses a Makefile to simplify getting started.
+- This project requires Python 3 and [uv](https://docs.astral.sh/uv/) to run.
 
 - This project uses [Makefile](https://www.gnu.org/software/make/). There are several recipes included to ease
 the task of installing and running the application.
 
 **NOTE**: Most of the Makefile recipes enforce the use of
 [virtual environments](https://docs.python.org/3/library/venv.html), and by default they will check if there is a
-virtual environemnt activated, refusing to run otherwise.
+virtual environment activated, refusing to run otherwise.
 
 ### **Optional for deploying to ephemeral environments:**
 
@@ -62,7 +60,7 @@ Tests can be run using the `test` recipe:
 make test
 ```
 
-This would run the tests using the default configured test runner using Django `test` command from `manage.py` script.
+This would run the tests using the default configured test runner.
 
 ### Generating code coverage
 
@@ -74,7 +72,7 @@ make coverage
 
 This will:
 
-- Install the development depenencies (to install [coverage.py])
+- Install the development dependencies (to install [coverage.py])
 - Run the tests
 - Generate a report (by default, the report format will be HTML).
 
@@ -100,20 +98,7 @@ To run this project locally simply run the following command:
 make run
 ```
 
-After running that command you should see this output:
-
-```shell
-Watching for file changes with StatReloader
-Performing system checks...
-
-System check identified no issues (0 silenced).
-June 14, 2023 - 12:34:18
-Django version 4.2.2, using settings 'backend_starter_app.settings'
-Starting development server at http://127.0.0.1:8000/
-Quit the server with CONTROL-C.
-```
-
-Navigate to http://127.0.0.1:8080 to access to the Django application's web console.
+Navigate to http://127.0.0.1:8080 to access to the application's web console.
 
 ### Running in a container locally:
 
@@ -171,7 +156,7 @@ simplicity.
 
 ### Building and pushing the backend starter application image
 
-Make sure to log in to your Quay.io account before this step, this guide will asume you have created a repository in
+Make sure to log in to your Quay.io account before this step, this guide will assume you have created a repository in
 Quay to host your images. We **encourage you to use a public repository** to simplify the process, since a private
 repository will require you to create an additional secret on the Ephemeral namespace to be able to deploy the image.
 
@@ -313,15 +298,3 @@ You can install the pre-commit package and the hooks themselves with the followi
 $ make install_dev
 ```
 **Note**: none of the hooks we provide are required but are just our recommendations.
-
-### Configuring Prometheus Metrics
-
-The Prometheus client is handled by [django-prometheus](https://github.com/korfuri/django-prometheus). This provides the
-prometheus_client globally so adding metrics is as simple as making new objects to track what you want. Documentation on
-how to add these metrics can be found [here](https://github.com/prometheus/client_python#instrumenting).
-
-### Configuring Logging
-
-For logging configuration, we are using the Django's native configuration tools with
-[python-json-logger](https://github.com/madzak/python-json-logger) to put the logs in JSON format. More information on how to
-further configure logging can be found [here](https://docs.djangoproject.com/en/4.2/topics/logging/#configuring-logging).
