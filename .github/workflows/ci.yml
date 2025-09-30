@@ -30,3 +30,32 @@ jobs:
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+
+  build-and-push:
+    name: podman build from Dockerfile
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install podman
+
+      - name: Build Image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: distributors-backend
+          tags: ${{ github.sha }}
+          containerfiles: ./Dockerfile
+
+      - name: Push Image
+        id: push-image
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: distributors-backend
+          tags: ${{ github.sha }}
+          registry: quay.io/cloudservices
