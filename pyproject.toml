@@ -5,7 +5,7 @@ version = "0.0.1"
 requires-python = ">=3.12"
 dependencies = [
     "dotenv==0.9.*",
-    "fastapi[standard]==0.116.*",
+    "fastapi[standard]==0.118.*",
     "pydantic-settings==2.10.*",
     "pyjks==20.0.*",
     "requests==2.32.*",
