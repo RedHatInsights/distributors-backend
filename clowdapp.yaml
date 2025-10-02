@@ -18,7 +18,8 @@ objects:
       webServices:
         public:
           enabled: true
-          apiPath: "${APP_NAME}"
+          apiPaths:
+            - "/api/${APP_NAME}/"
           whitelistPaths:
             - "/api/${APP_NAME}/docs"
             - "/api/${APP_NAME}/openapi.json"
