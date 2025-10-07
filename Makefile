@@ -131,6 +131,3 @@ bonfire_deploy: namespace_check
 		-p service/SALESFORCE_CERT_ALIAS="$(SALESFORCE_CERT_ALIAS)" \
 		-p service/SALESFORCE_CERT_PASSWORD="$(SALESFORCE_CERT_PASSWORD)" \
 		-n $(NAMESPACE)
-
-oc_login:
-	@oc login --token=${OC_LOGIN_TOKEN} --server=${OC_LOGIN_SERVER}
