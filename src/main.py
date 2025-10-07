@@ -13,7 +13,7 @@ from util.settings import constants
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="Red Hat Distributor Pricebook API",
+    title="Red Hat Distributor API",
     docs_url=f"/api/{constants.APP_NAME}/docs",
     openapi_url=f"/api/{constants.APP_NAME}/openapi.json",
 )
