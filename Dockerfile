@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/python-312:9.6 AS builder
+FROM registry.access.redhat.com/ubi9/python-312:9.6-1758514557 AS builder
 
 COPY --chown=1001:0 . /app-src
 RUN pip install --no-cache-dir /app-src
