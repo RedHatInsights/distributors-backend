@@ -115,7 +115,7 @@ parameters:
   value: latest
 - name: IMAGE
   description: Image name
-  value: quay.io/cloudservices/distributors-backend
+  value: quay.io/redhat-services-prod/distributors-tenant/distributors-backend
 - name: ENV_NAME
   description: ClowdEnv Name
 - name: REPLICAS_SERVICE
