@@ -416,12 +416,12 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dotenv", specifier = "==0.9.*" },
-    { name = "fastapi", extras = ["standard"], specifier = "==0.116.*" },
-    { name = "pydantic-settings", specifier = "==2.10.*" },
-    { name = "pyjks", specifier = "==20.0.*" },
-    { name = "requests", specifier = "==2.32.*" },
-    { name = "simple-salesforce", specifier = "==1.12.*" },
+    { name = "dotenv", specifier = "==0.*" },
+    { name = "fastapi", extras = ["standard"], specifier = "==0.*" },
+    { name = "pydantic-settings", specifier = "==2.*" },
+    { name = "pyjks", specifier = "==20.*" },
+    { name = "requests", specifier = "==2.*" },
+    { name = "simple-salesforce", specifier = "==1.*" },
 ]
 
 [package.metadata.requires-dev]
