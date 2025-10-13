@@ -6,14 +6,11 @@ CONTAINER_WEBPORT ?= 8000
 HOST_WEBPORT=$(CONTAINER_WEBPORT)
 CONTEXT = .
 CONTAINER_ENGINE = podman
-BONFIRE_CONFIG = .bonfirecfg.yaml
-CLOWDAPP_TEMPLATE ?= clowdapp.yaml
-APP_NAME ?= distributors-backend
+APP_NAME ?= distributors
 PYTHON_CMD = uv run
-QUAY_ORG ?= cloudservices
-QUAY_REPOSITORY ?= $(APP_NAME)
+QUAY_ORG ?= redhat-services-prod
+QUAY_REPOSITORY ?= distributors-tenant/$(APP_NAME)-backend
 IMAGE = quay.io/$(QUAY_ORG)/$(QUAY_REPOSITORY)
-export ACG_CONFIG = cdappconfig.json
 
 # Determine the container engine
 ifneq ($(shell command -v "podman"),)
@@ -61,7 +58,7 @@ venv_create:
 	@test -d .venv && echo "Virtual environment already exists" || uv venv $(VENV)
 
 quay_login:
-	echo -n "$(QUAY_TOKEN)" | $(CONTAINER_ENGINE) login quay.io --username $(QUAY_USER) --password-stdin
+	$(CONTAINER_ENGINE) login quay.io
 
 lint: install_dev
 	uv run pre-commit run --all
@@ -91,24 +88,21 @@ build-image:
 run-container:
 	$(CONTAINER_ENGINE) run -it --rm -p $(HOST_WEBPORT):$(CONTAINER_WEBPORT) $(IMAGE):$(IMAGE_TAG) runserver 0.0.0.0:8000
 
-push-image:
-	$(CONTAINER_ENGINE) push $(IMAGE):$(IMAGE_TAG)
-
 namespace_check:
 ifndef NAMESPACE
 	$(error NAMESPACE not defined, please specify a NAMESPACE environment varible)
 endif
 
 bonfire_process:
-	bonfire process -c $(BONFIRE_CONFIG) $(APP_NAME) \
-		-p service/IMAGE=$(IMAGE) -p service/IMAGE_TAG=$(IMAGE_TAG) \
-		-p service/SALESFORCE_DOMAIN="$(SALESFORCE_DOMAIN)" \
-		-p service/SALESFORCE_USERNAME="$(SALESFORCE_USERNAME)" \
-		-p service/SALESFORCE_CONSUMER_KEY="$(SALESFORCE_CONSUMER_KEY)" \
-		-p service/SALESFORCE_KEYSTORE_DATA="$(SALESFORCE_KEYSTORE_DATA)" \
-		-p service/SALESFORCE_KEYSTORE_PASSWORD="$(SALESFORCE_KEYSTORE_PASSWORD)" \
-		-p service/SALESFORCE_CERT_ALIAS="$(SALESFORCE_CERT_ALIAS)" \
-		-p service/SALESFORCE_CERT_PASSWORD="$(SALESFORCE_CERT_PASSWORD)" \
+	bonfire process $(APP_NAME) \
+		-p $(APP_NAME)-backend/IMAGE=$(IMAGE) -p $(APP_NAME)-backend/IMAGE_TAG=$(IMAGE_TAG) \
+		-p $(APP_NAME)-backend/SALESFORCE_DOMAIN="$(SALESFORCE_DOMAIN)" \
+		-p $(APP_NAME)-backend/SALESFORCE_USERNAME="$(SALESFORCE_USERNAME)" \
+		-p $(APP_NAME)-backend/SALESFORCE_CONSUMER_KEY="$(SALESFORCE_CONSUMER_KEY)" \
+		-p $(APP_NAME)-backend/SALESFORCE_KEYSTORE_DATA="$(SALESFORCE_KEYSTORE_DATA)" \
+		-p $(APP_NAME)-backend/SALESFORCE_KEYSTORE_PASSWORD="$(SALESFORCE_KEYSTORE_PASSWORD)" \
+		-p $(APP_NAME)-backend/SALESFORCE_CERT_ALIAS="$(SALESFORCE_CERT_ALIAS)" \
+		-p $(APP_NAME)-backend/SALESFORCE_CERT_PASSWORD="$(SALESFORCE_CERT_PASSWORD)" \
 		-n default
 
 bonfire_reserve_namespace:
@@ -121,13 +115,13 @@ bonfire_user_namespaces:
 	bonfire namespace list --mine
 
 bonfire_deploy: namespace_check
-	bonfire deploy -c $(BONFIRE_CONFIG) $(APP_NAME) \
-		-p service/IMAGE=$(IMAGE) -p service/IMAGE_TAG=$(IMAGE_TAG) \
-		-p service/SALESFORCE_DOMAIN="$(SALESFORCE_DOMAIN)" \
-		-p service/SALESFORCE_USERNAME="$(SALESFORCE_USERNAME)" \
-		-p service/SALESFORCE_CONSUMER_KEY="$(SALESFORCE_CONSUMER_KEY)" \
-		-p service/SALESFORCE_KEYSTORE_DATA="$(SALESFORCE_KEYSTORE_DATA)" \
-		-p service/SALESFORCE_KEYSTORE_PASSWORD="$(SALESFORCE_KEYSTORE_PASSWORD)" \
-		-p service/SALESFORCE_CERT_ALIAS="$(SALESFORCE_CERT_ALIAS)" \
-		-p service/SALESFORCE_CERT_PASSWORD="$(SALESFORCE_CERT_PASSWORD)" \
+	bonfire deploy $(APP_NAME) \
+		-p $(APP_NAME)-backend/IMAGE=$(IMAGE) -p $(APP_NAME)-backend/IMAGE_TAG=$(IMAGE_TAG) \
+		-p $(APP_NAME)-backend/SALESFORCE_DOMAIN="$(SALESFORCE_DOMAIN)" \
+		-p $(APP_NAME)-backend/SALESFORCE_USERNAME="$(SALESFORCE_USERNAME)" \
+		-p $(APP_NAME)-backend/SALESFORCE_CONSUMER_KEY="$(SALESFORCE_CONSUMER_KEY)" \
+		-p $(APP_NAME)-backend/SALESFORCE_KEYSTORE_DATA="$(SALESFORCE_KEYSTORE_DATA)" \
+		-p $(APP_NAME)-backend/SALESFORCE_KEYSTORE_PASSWORD="$(SALESFORCE_KEYSTORE_PASSWORD)" \
+		-p $(APP_NAME)-backend/SALESFORCE_CERT_ALIAS="$(SALESFORCE_CERT_ALIAS)" \
+		-p $(APP_NAME)-backend/SALESFORCE_CERT_PASSWORD="$(SALESFORCE_CERT_PASSWORD)" \
 		-n $(NAMESPACE)
