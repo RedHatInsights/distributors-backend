@@ -3,8 +3,7 @@
 import base64
 import logging
 
-from fastapi import FastAPI, Depends, Request
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi import FastAPI, Request
 
 from routes import health, pricebook
 from util.settings import constants
@@ -52,14 +51,15 @@ async def log_headers(request: Request, call_next):
     return response
 
 
-def basic_auth(credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
-    """Basic auth dependency for OpenAPI spec, handled by ConsoleDot."""
-    return credentials
+# # add basic auth for testing in ephemeral environment
+# def basic_auth(credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
+#     """Basic auth dependency for OpenAPI spec, handled by ConsoleDot."""
+#     return credentials
 
 
 app.include_router(health.router)
 app.include_router(
     pricebook.router,
     prefix=f"/api/{constants.APP_NAME}",
-    dependencies=[Depends(basic_auth)],
+    # dependencies=[Depends(basic_auth)],
 )
