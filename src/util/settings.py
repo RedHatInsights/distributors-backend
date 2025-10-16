@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env")
 
-    APP_NAME: str = "distributors-backend"
+    APP_NAME: str = "distributors"
 
     LOG_LEVEL: str = "INFO"
 
