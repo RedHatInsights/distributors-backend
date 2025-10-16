@@ -5,17 +5,14 @@ import logging
 
 from fastapi import FastAPI, Request
 
-from routes import health, pricebook
+from routes.v1.app import v1
+from routes import health
 from util.settings import constants
 
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(
-    title="Red Hat Distributor API",
-    docs_url=f"/api/{constants.APP_NAME}/docs",
-    openapi_url=f"/api/{constants.APP_NAME}/openapi.json",
-)
+app = FastAPI(title="Red Hat Distributors API")
 
 
 class HealthCheckFilter(logging.Filter):
@@ -51,15 +48,8 @@ async def log_headers(request: Request, call_next):
     return response
 
 
-# # add basic auth for testing in ephemeral environment
-# def basic_auth(credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
-#     """Basic auth dependency for OpenAPI spec, handled by ConsoleDot."""
-#     return credentials
-
-
+# health endpoints
 app.include_router(health.router)
-app.include_router(
-    pricebook.router,
-    prefix=f"/api/{constants.APP_NAME}",
-    # dependencies=[Depends(basic_auth)],
-)
+
+# create versioned api endpoints and docs
+app.mount(f"/api/{constants.APP_NAME}/v1", v1)
