@@ -91,20 +91,21 @@ objects:
             path: /readyz
             port: ${{WEB_PORT}}
 
-# # secret configuration for running in ephemeral environment ONLY
-# - apiVersion: v1
-#   kind: Secret
-#   metadata:
-#     name: "${APP_NAME}-salesforce-config"
-#   type: Opaque
-#   stringData:
-#     SALESFORCE_DOMAIN: "${SALESFORCE_DOMAIN}"
-#     SALESFORCE_USERNAME: "${SALESFORCE_USERNAME}"
-#     SALESFORCE_CONSUMER_KEY: "${SALESFORCE_CONSUMER_KEY}"
-#     SALESFORCE_KEYSTORE_PASSWORD: "${SALESFORCE_KEYSTORE_PASSWORD}"
-#     SALESFORCE_CERT_ALIAS: "${SALESFORCE_CERT_ALIAS}"
-#     SALESFORCE_CERT_PASSWORD: "${SALESFORCE_CERT_PASSWORD}"
-#     salesforce_keystore.jks: "${SALESFORCE_KEYSTORE_DATA}"
+# secret configuration for running in ephemeral environment ONLY
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: "${APP_NAME}-salesforce-config"
+  type: Opaque
+  stringData:
+    SALESFORCE_DOMAIN: "${SALESFORCE_DOMAIN}"
+    SALESFORCE_USERNAME: "${SALESFORCE_USERNAME}"
+    SALESFORCE_CONSUMER_KEY: "${SALESFORCE_CONSUMER_KEY}"
+    SALESFORCE_KEYSTORE_PASSWORD: "${SALESFORCE_KEYSTORE_PASSWORD}"
+    SALESFORCE_CERT_ALIAS: "${SALESFORCE_CERT_ALIAS}"
+    SALESFORCE_CERT_PASSWORD: "${SALESFORCE_CERT_PASSWORD}"
+  data:
+    salesforce_keystore.jks: "${SALESFORCE_KEYSTORE_DATA}"
 
 parameters:
 - name: APP_NAME
