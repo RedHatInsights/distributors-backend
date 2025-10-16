@@ -7,7 +7,7 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6-1758184547
 
 ENV VIRTUAL_ENV='/opt/app-root'
 ENV APP_SRC='/app-src'
-ENV PORT=8080
+ENV PORT=8000
 
 RUN microdnf install -y python3.12 \
     && microdnf clean all
