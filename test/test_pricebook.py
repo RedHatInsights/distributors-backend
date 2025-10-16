@@ -3,6 +3,7 @@
 import pytest
 from unittest.mock import patch
 from fastapi.testclient import TestClient
+from test.conftest import get_api_endpoint
 
 
 class TestPricebookRoutes:
@@ -16,7 +17,7 @@ class TestPricebookRoutes:
         mock_response = {"pricebooks": [{"id": "123", "name": "Test Pricebook"}]}
         mock_execute_apex.return_value = mock_response
 
-        response = authenticated_client.get("/api/distributors-backend/PricebookList")
+        response = authenticated_client.get(f"{get_api_endpoint()}/PricebookList")
 
         assert response.status_code == 200
         assert response.json() == mock_response
@@ -32,7 +33,7 @@ class TestPricebookRoutes:
         mock_execute_apex.return_value = mock_response
 
         response = authenticated_client.get(
-            f"/api/distributors-backend/Pricebook?pricebookId={pricebook_id}"
+            f"{get_api_endpoint()}/Pricebook?pricebookId={pricebook_id}"
         )
 
         assert response.status_code == 200
@@ -53,7 +54,7 @@ class TestPricebookRoutes:
         mock_execute_apex.return_value = mock_response
 
         response = authenticated_client.get(
-            f"/api/distributors-backend/PricebookChangeSummary?pricebookId={pricebook_id}"
+            f"{get_api_endpoint()}/PricebookChangeSummary?pricebookId={pricebook_id}"
         )
 
         assert response.status_code == 200
@@ -72,7 +73,7 @@ class TestPricebookRoutes:
         mock_response = {"bands": [{"tier": "gold", "discount": 0.15}]}
         mock_execute_apex.return_value = mock_response
 
-        response = authenticated_client.get("/api/distributors-backend/DiscountBands")
+        response = authenticated_client.get(f"{get_api_endpoint()}/DiscountBands")
 
         assert response.status_code == 200
         assert response.json() == mock_response
@@ -82,7 +83,7 @@ class TestPricebookRoutes:
 
     def test_get_pricebook_missing_id(self, authenticated_client: TestClient):
         """Test that pricebook endpoint requires pricebookId parameter."""
-        response = authenticated_client.get("/api/distributors-backend/Pricebook")
+        response = authenticated_client.get(f"{get_api_endpoint()}/Pricebook")
 
         assert response.status_code == 422  # Validation error
 
@@ -91,7 +92,7 @@ class TestPricebookRoutes:
     ):
         """Test that change summary endpoint requires pricebookId parameter."""
         response = authenticated_client.get(
-            "/api/distributors-backend/PricebookChangeSummary"
+            f"{get_api_endpoint()}/PricebookChangeSummary"
         )
 
         assert response.status_code == 422  # Validation error
@@ -104,4 +105,4 @@ class TestPricebookRoutes:
         mock_execute_apex.side_effect = Exception("Salesforce connection error")
 
         with pytest.raises(Exception, match="Salesforce connection error"):
-            authenticated_client.get("/api/distributors-backend/PricebookList")
+            authenticated_client.get(f"{get_api_endpoint()}/PricebookList")

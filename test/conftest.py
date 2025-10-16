@@ -5,6 +5,7 @@ import pytest
 from unittest.mock import Mock
 
 # Force test environment variables to override any existing ones
+os.environ["APP_NAME"] = "distributors"
 os.environ["SALESFORCE_DOMAIN"] = "test-domain"
 os.environ["SALESFORCE_USERNAME"] = "test@example.com"
 os.environ["SALESFORCE_CONSUMER_KEY"] = "test-consumer-key"
@@ -38,3 +39,14 @@ def authenticated_client():
 def mock_salesforce():
     """Mock salesforce service for testing."""
     return Mock()
+
+
+def get_api_endpoint() -> str:
+    """Get the API endpoint path for tests.
+
+    Returns:
+        str: The API endpoint path in the format '/api/{APP_NAME}'
+    """
+    from src.util.settings import constants
+
+    return f"/api/{constants.APP_NAME}"

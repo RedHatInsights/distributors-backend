@@ -2,7 +2,7 @@ TEMPDIR_INFOSECTOOLS = /tmp/infosec-dev-tools
 VENV = .venv
 COVERAGE_REPORT_FORMAT = 'html'
 DOCKERFILE ?= Dockerfile
-CONTAINER_WEBPORT ?= 8000
+CONTAINER_WEBPORT ?= 8080
 HOST_WEBPORT=$(CONTAINER_WEBPORT)
 CONTEXT = .
 CONTAINER_ENGINE = podman
@@ -22,7 +22,7 @@ else
 endif
 
 # Determine IMAGE_TAG and LABEL
-BASE_IMAGE_TAG=$(shell git rev-parse --short=7 HEAD)
+BASE_IMAGE_TAG=latest
 ifdef ghprbPullId
 	IMAGE_TAG=pr-$(ghprbPullId)-$(BASE_IMAGE_TAG)
 	LABEL=$(shell echo "--label quay.expires-after=1h")
@@ -34,7 +34,7 @@ else
 endif
 
 run: venv_check install
-	uv run fastapi dev src/main.py
+	uv run fastapi dev src/main.py --port $(HOST_WEBPORT)
 
 install_pre_commit: venv_check
 	# Remove any outdated tools
@@ -86,7 +86,16 @@ build-image:
 	$(CONTAINER_ENGINE) buildx build --platform linux/amd64 -t $(IMAGE):$(IMAGE_TAG) -f $(DOCKERFILE) $(LABEL) $(CONTEXT)
 
 run-container:
-	$(CONTAINER_ENGINE) run -it --rm -p $(HOST_WEBPORT):$(CONTAINER_WEBPORT) $(IMAGE):$(IMAGE_TAG) runserver 0.0.0.0:8000
+	$(CONTAINER_ENGINE) run -it --rm -p $(HOST_WEBPORT):$(CONTAINER_WEBPORT) \
+		-e PORT="$(CONTAINER_WEBPORT)" \
+		-e SALESFORCE_DOMAIN="$(SALESFORCE_DOMAIN)" \
+		-e SALESFORCE_USERNAME="$(SALESFORCE_USERNAME)" \
+		-e SALESFORCE_CONSUMER_KEY="$(SALESFORCE_CONSUMER_KEY)" \
+		-e SALESFORCE_KEYSTORE_PATH="$(SALESFORCE_KEYSTORE_PATH)" \
+		-e SALESFORCE_KEYSTORE_PASSWORD="$(SALESFORCE_KEYSTORE_PASSWORD)" \
+		-e SALESFORCE_CERT_ALIAS="$(SALESFORCE_CERT_ALIAS)" \
+		-e SALESFORCE_CERT_PASSWORD="$(SALESFORCE_CERT_PASSWORD)" \
+		$(IMAGE):$(IMAGE_TAG)
 
 namespace_check:
 ifndef NAMESPACE
