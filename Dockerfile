@@ -7,6 +7,7 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6-1758184547
 
 ENV VIRTUAL_ENV='/opt/app-root'
 ENV APP_SRC='/app-src'
+ENV PORT=8080
 
 RUN microdnf install -y python3.12 \
     && microdnf clean all
@@ -22,4 +23,4 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 WORKDIR /app-src
 
-ENTRYPOINT ["fastapi", "run", "/app-src/src/main.py"]
+ENTRYPOINT ["sh", "-c", "fastapi run /app-src/src/main.py --port $PORT"]

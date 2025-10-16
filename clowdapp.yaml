@@ -28,6 +28,8 @@ objects:
         env:
           - name: APP_NAME
             value: "${APP_NAME}"
+          - name: PORT
+            value: "${WEB_PORT}"
           - name: SALESFORCE_KEYSTORE_PATH
             value: "${SALESFORCE_KEYSTORE_DIR}/${SALESFORCE_KEYSTORE_FILE}"
           - name: SALESFORCE_DOMAIN
@@ -123,7 +125,7 @@ parameters:
   value: "1"
 - name: WEB_PORT
   description: Port this is running on
-  value: "8000"
+  value: "8080"
 - name: MEMORY_LIMIT_SERVICE
   value: 512Mi
 - name: MEMORY_REQUEST_SERVICE
