@@ -41,12 +41,12 @@ def mock_salesforce():
     return Mock()
 
 
-def get_api_endpoint() -> str:
+def get_api_endpoint(version: str) -> str:
     """Get the API endpoint path for tests.
 
     Returns:
-        str: The API endpoint path in the format '/api/{APP_NAME}'
+        str: The API endpoint prefix
     """
     from src.util.settings import constants
 
-    return f"/api/{constants.APP_NAME}"
+    return f"/api/{constants.APP_NAME}/{version}"
