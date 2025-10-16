@@ -1,5 +1,6 @@
 """Salesforce integration service."""
 
+import base64
 from logging import Logger
 from typing import Any
 
@@ -47,6 +48,6 @@ def _get_private_key() -> str:
         with open(constants.SALESFORCE_KEYSTORE_PATH, "rb") as f:
             file_contents = f.read()
             log.error(
-                f"Full keystore file contents (hex): {file_contents.hex().upper()}"
+                f"Full keystore file contents (base64): {base64.b64encode(file_contents).decode()}"
             )
         raise
