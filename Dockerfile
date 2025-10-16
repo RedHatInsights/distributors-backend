@@ -3,7 +3,7 @@ FROM registry.access.redhat.com/ubi9/python-312:9.6-1758514557 AS builder
 COPY --chown=1001:0 . /app-src
 RUN pip install --no-cache-dir /app-src
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6-1758184547
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6-1760515502
 
 ENV VIRTUAL_ENV='/opt/app-root'
 ENV APP_SRC='/app-src'
