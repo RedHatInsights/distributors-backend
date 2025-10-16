@@ -34,11 +34,19 @@ def _get_salesforce() -> Salesforce:
 
 
 def _get_private_key() -> str:
-    keystore = jks.KeyStore.load(
-        constants.SALESFORCE_KEYSTORE_PATH,
-        constants.SALESFORCE_KEYSTORE_PASSWORD.get_secret_value(),
-    )
-    pk_entry = keystore.private_keys[constants.SALESFORCE_CERT_ALIAS]
-    pk_entry.decrypt(constants.SALESFORCE_CERT_PASSWORD.get_secret_value())
+    try:
+        keystore = jks.KeyStore.load(
+            constants.SALESFORCE_KEYSTORE_PATH,
+            constants.SALESFORCE_KEYSTORE_PASSWORD.get_secret_value(),
+        )
+        pk_entry = keystore.private_keys[constants.SALESFORCE_CERT_ALIAS]
+        pk_entry.decrypt(constants.SALESFORCE_CERT_PASSWORD.get_secret_value())
 
-    return jks.pkey_as_pem(pk_entry)
+        return jks.pkey_as_pem(pk_entry)
+    except jks.util.BadKeystoreFormatException:
+        with open(constants.SALESFORCE_KEYSTORE_PATH, "rb") as f:
+            file_contents = f.read()
+            log.error(
+                f"Full keystore file contents (hex): {file_contents.hex().upper()}"
+            )
+        raise
