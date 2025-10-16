@@ -7,6 +7,12 @@ from simple_salesforce import Salesforce
 from src.services.salesforce import execute_apex, _get_salesforce, _get_private_key
 
 
+class MockBadKeystoreFormatException(Exception):
+    """Mock exception to simulate jks.util.BadKeystoreFormatException."""
+
+    pass
+
+
 class TestSalesforceService:
     """Test Salesforce service functions."""
 
@@ -168,6 +174,9 @@ class TestSalesforceService:
             "wrong_pass"
         )
 
+        # Mock the BadKeystoreFormatException class
+        mock_jks.util.BadKeystoreFormatException = MockBadKeystoreFormatException
+
         mock_jks.KeyStore.load.side_effect = Exception("Keystore load failed")
 
         # Act & Assert
@@ -187,6 +196,9 @@ class TestSalesforceService:
             "keystore_pass"
         )
         mock_constants.SALESFORCE_CERT_ALIAS = "missing_alias"
+
+        # Mock the BadKeystoreFormatException class
+        mock_jks.util.BadKeystoreFormatException = MockBadKeystoreFormatException
 
         mock_jks.KeyStore.load.return_value = mock_keystore
 
@@ -212,6 +224,9 @@ class TestSalesforceService:
         mock_constants.SALESFORCE_CERT_PASSWORD.get_secret_value.return_value = (
             "wrong_cert_pass"
         )
+
+        # Mock the BadKeystoreFormatException class
+        mock_jks.util.BadKeystoreFormatException = MockBadKeystoreFormatException
 
         mock_jks.KeyStore.load.return_value = mock_keystore
 
