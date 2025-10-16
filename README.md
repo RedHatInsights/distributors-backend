@@ -98,7 +98,7 @@ To run this project locally simply run the following command:
 make run
 ```
 
-Navigate to http://127.0.0.1:8080 to access to the application's web console.
+Navigate to http://127.0.0.1:8000 to access to the application's web console.
 
 ### Running in a container locally:
 
