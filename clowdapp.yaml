@@ -21,6 +21,7 @@ objects:
           apiPaths:
             - "/api/${APP_NAME}/"
           whitelistPaths:
+            - "/api/${APP_NAME}/v1/"
             - "/api/${APP_NAME}/docs"
             - "/api/${APP_NAME}/openapi.json"
       podSpec:
