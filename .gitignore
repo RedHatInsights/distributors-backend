@@ -1,5 +1,9 @@
-# Created by https://www.toptal.com/developers/gitignore/api/vim,django,python,visualstudiocode,pycharm+all
-# Edit at https://www.toptal.com/developers/gitignore?templates=vim,django,python,visualstudiocode,pycharm+all
+# Created by https://www.toptal.com/developers/gitignore/api/vim,django,python,pycharm+all,visualstudiocode,direnv
+# Edit at https://www.toptal.com/developers/gitignore?templates=vim,django,python,pycharm+all,visualstudiocode,direnv
+
+### direnv ###
+.direnv
+.envrc
 
 ### Django ###
 *.log
@@ -391,4 +395,4 @@ tags
 .history
 .ionide
 
-# End of https://www.toptal.com/developers/gitignore/api/vim,django,python,visualstudiocode,pycharm+all
+# End of https://www.toptal.com/developers/gitignore/api/vim,django,python,pycharm+all,visualstudiocode,direnv
