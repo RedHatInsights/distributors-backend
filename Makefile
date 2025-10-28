@@ -42,7 +42,7 @@ salesforce_jks:
 	@echo "Successfully wrote JKS file to $(SALESFORCE_KEYSTORE_PATH)"
 
 run: venv_check install
-	# NOTE: if SALESFORCE_KEYSTORE_DATA set in <repo_root>/.env, pydantic will still load it
+	# NOTE: if SALESFORCE_KEYSTORE_DATA set in /.env, pydantic will still load it
 	unset SALESFORCE_KEYSTORE_DATA; uv run fastapi dev src/main.py --port $(HOST_WEBPORT)
 
 install_pre_commit: venv_check
