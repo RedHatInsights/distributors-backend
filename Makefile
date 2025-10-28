@@ -33,8 +33,17 @@ else
 	IMAGE_TAG=$(BASE_IMAGE_TAG)
 endif
 
+salesforce_jks:
+	@test -n "$(SALESFORCE_KEYSTORE_PATH)" || (echo "Error: SALESFORCE_KEYSTORE_PATH not defined" && exit 1)
+	@test -n "$(SALESFORCE_KEYSTORE_DATA)" || (echo "Error: SALESFORCE_KEYSTORE_DATA not defined" && exit 1)
+	@echo "Decoding base64 SALESFORCE_KEYSTORE_DATA and writing to $(SALESFORCE_KEYSTORE_PATH)..."
+	@mkdir -p $(dir $(SALESFORCE_KEYSTORE_PATH))
+	@echo "$(SALESFORCE_KEYSTORE_DATA)" | base64 -d > $(SALESFORCE_KEYSTORE_PATH)
+	@echo "Successfully wrote JKS file to $(SALESFORCE_KEYSTORE_PATH)"
+
 run: venv_check install
-	uv run fastapi dev src/main.py --port $(HOST_WEBPORT)
+	# NOTE: if SALESFORCE_KEYSTORE_DATA set in <repo_root>/.env, pydantic will still load it
+	unset SALESFORCE_KEYSTORE_DATA; uv run fastapi dev src/main.py --port $(HOST_WEBPORT)
 
 install_pre_commit: venv_check
 	# Remove any outdated tools
