@@ -99,7 +99,7 @@ run-container:
 
 namespace_check:
 ifndef NAMESPACE
-	$(error NAMESPACE not defined, please specify a NAMESPACE environment varible)
+	$(error NAMESPACE not defined, please specify a NAMESPACE environment variable)
 endif
 
 bonfire_process:
