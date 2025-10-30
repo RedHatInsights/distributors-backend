@@ -92,6 +92,9 @@ There are Makefile recipes to run the application directly or in a container
 
 ### Running as a local process
 
+> Note: this requires all variables defined in [settings](/src/util/settings.py) to be set.
+> Also, see [salesforce jks](#preparing-salesforce-jks) for help with the jks secret.
+
 To run this project locally simply run the following command:
 
 ```shell
@@ -120,6 +123,7 @@ To run the recently built image, similarly to how you built the image in the pre
 ```shell
 make run-container
 ```
+
 
 ## Deploying to an Ephemeral namespace
 
@@ -261,7 +265,25 @@ $ curl -u jdoe:LCAO4BtTaFQmoTpc https://env-ephemeral-48i1in-dbky5uxs.apps.c-rh-
 ```
 
 The host name can be found in the route for your service.
+
+
 ## Additional Makefile recipes
+
+### Preparing Salesforce jks
+
+This application requires a Salesforce jks filepath at runtime via the `SALESFORCE_KEYSTORE_PATH` environment variable.
+
+To simplify the managing of this file, you can use `SALESFORCE_KEYSTORE DATA` with:
+
+```shell
+# can alternatively append argument `SALESFORCE_KEYSTORE_DATA=<jks-string>`
+make salesforce_jks
+```
+
+This converts the base-64 encoded string to a new (overwritten) file to your designated `SALESFORCE_KEYSTORE_PATH`.
+
+> Note: Due to pydantic, if you use the default `/.env` path and try to run the app with `SALESFORCE_KEYSTORE_DATA` 
+> set in it, it will error out due to an unspecified environment variable being set.
 
 ### Installing rh-pre-commit
 
@@ -275,6 +297,9 @@ $ make install_pre_commit
 ```
 
 Follow the prompt to receive a token and complete the install.
+
+> Note for `pyenv` users: This installer forcefully uses/installs using your system python, circumventing `pyenv`;
+> temporarily set `pyenv global system` else you will encounter install errors.
 
 Once complete you can test the precommit by running in the repo:
 
