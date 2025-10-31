@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     APP_NAME: str = "distributors"
 
-    LOG_LEVEL: str = "INFO"
+    DEBUG_MODE: bool = False
 
     SALESFORCE_DOMAIN: str
     SALESFORCE_USERNAME: str
